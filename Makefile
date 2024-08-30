@@ -2,7 +2,7 @@
 
 # Compiler and compiler flags
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 # Target executable
 TARGET = hserver hclient

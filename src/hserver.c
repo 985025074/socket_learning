@@ -1,4 +1,6 @@
 #include "normal_include.h"
+
+
 int main(int argc, char *argv[]){
     checkArgs(argc,2,"args is not enough");
 
@@ -23,18 +25,54 @@ printf("Hello, world!\n");
     socklen_t client_addr_len;
     int accept_socket = accept(sockfd, (struct sockaddr*)&client_addr, &client_addr_len);
     checkReturn(accept_socket>0,1,"accept error");
+
+    // int serverStep = 1;
     printf("client ip: %s,client port %d\n",inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
-    char buffer[1024];
-    int read_result;
-    while((read_result = read(accept_socket, buffer, 1024))){
-        checkTrue(read_result>=0,"read error");
-        int write_result = write(accept_socket, buffer, read_result);
-        checkTrue(write_result>=0,"write error");
-        printf("client send: %s\n",buffer);
-        if(strcmp(buffer,"exit") == 0){
+
+    while(1){
+        u_int32_t operator_number = 0;
+        readWithCheck(accept_socket,(char*)&operator_number,4,"read operator_number error");
+        //debug
+        printf("operator_number: %d\n",operator_number);
+        //debug
+        char buffer[1024] = {0};
+        int buffer_number = readWithCheck(accept_socket,buffer,sizeof(uint32_t)*operator_number+sizeof(char),"read buffer error");
+        if(buffer_number == 0){
+            close(accept_socket);
+            printf("client close the connection\n");
             break;
         }
+        switch (buffer[buffer_number-1]){
+            case '+':
+                int temp_result = 0;
+                for(uint32_t i=0;i<operator_number;i++){
+                    temp_result += *(uint32_t*)(buffer+i*sizeof(uint32_t));
+                }
+                printf("+ temp_result: %d\n",temp_result);
+                writeWithCheck(accept_socket,(char*)&temp_result,sizeof(uint32_t),"write to client fail!");
+                break;
+            case '-':
+                temp_result = 0;
+                temp_result = *(uint32_t*)(buffer) - *(uint32_t*)(buffer+4);
+                printf("- temp_result: %d\n",temp_result);
+                writeWithCheck(accept_socket,(char*)&temp_result,sizeof(uint32_t),"write to client fail!");
+                break;
+            case '*':
+                temp_result = 1;
+                for(uint32_t i=0;i<operator_number;i++){
+                    temp_result *= *(uint32_t*)(buffer+i*sizeof(uint32_t));
+                }
+                printf("* temp_result: %d\n",temp_result);
+                writeWithCheck(accept_socket,(char*)&temp_result,sizeof(uint32_t),"write to client fail!");
+                break;
+            default:
+                printf("operator error!\n");
+                goto end;
+                break;
+        }
+
     }
+    end:
     close(accept_socket);
    }
    return 0;
