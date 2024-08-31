@@ -1,10 +1,24 @@
 #include "normal_include.h"
+#include <errno.h>
 
-
+void child_handler(int){
+    //it is said that printf is not safe in signal handler.but i have forgotten the detail,so let us use it temporarily.
+    int status = 0;
+    int child_pid = waitpid(-1,&status,WNOHANG);
+    printf("child process %d terminated\n",child_pid);
+    // error handle is dismiss.
+    if(WIFEXITED(status)){
+        printf("SafeExit!\n");
+    }
+}
 int main(int argc, char *argv[]){
     checkArgs(argc,2,"args is not enough");
-
-printf("Hello, world!\n");
+    printf("Hello, world!\n");
+    struct sigaction sa;
+    sa.sa_handler = child_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGCHLD, &sa, NULL);
    struct sockaddr_in example;
    memset(&example, 0, sizeof(example));
    example.sin_family = AF_INET;
@@ -24,11 +38,22 @@ printf("Hello, world!\n");
     struct sockaddr_in client_addr;
     socklen_t client_addr_len;
     int accept_socket = accept(sockfd, (struct sockaddr*)&client_addr, &client_addr_len);
-    checkReturn(accept_socket>0,1,"accept error");
-
+    // checkReturn(accept_socket>0,1,"accept error");
+    // the up one is false!
+    if (accept_socket < 0 && errno == EINTR){
+        i--;
+        continue; 
+    }
+    //----------- multi_process
+    pid_t child_pid = fork();
+    if(child_pid != 0){
+        close(accept_socket);
+        printf("client ip: %s,client port %d\n",inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+        continue;
+    }
+    //-----------
     // int serverStep = 1;
-    printf("client ip: %s,client port %d\n",inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
-
+    close(sockfd);
     while(1){
         u_int32_t operator_number = 0;
         readWithCheck(accept_socket,(char*)&operator_number,4,"read operator_number error");
@@ -74,6 +99,9 @@ printf("Hello, world!\n");
     }
     end:
     close(accept_socket);
+    close(sockfd);
+    return 0;
    }
-   return 0;
+    close(sockfd);
+    return 0;
 }

@@ -11,5 +11,6 @@
 #include "check.h"
 #include <unistd.h>
 #include <signal.h>
+#include <sys/wait.h>
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr_in6 sockaddr_in6;
