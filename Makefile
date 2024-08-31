@@ -5,10 +5,11 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g
 
 # Target executable
-TARGET = hserver hclient
+DEFUALT_TARGET = hserver hclient file_client file_server 
 
 LIB_NAME = check_lib
 
+RULE = $(CC) $(CFLAGS) -o ${OUTPUT}/$@ ${SRCS}/$@.c -L${LIBSRC} -l${LIB_NAME} -I${INCLUDE} -Wl,-rpath=${LIBSRC}
 # Source files
 
 #check_lib
@@ -22,25 +23,24 @@ LIBSRC = $(CURDIR)/output
 
 
 # Default target (compile the program)
-all: $(TARGET)
+all: $(DEFAULT_TARGET)
 half_close_exp: file_client file_server
+udp_exp: udp_client udp_server
 # Rule to compile the target executable
+# 可以使用 % 匹配所有任务目标
 # rpath 不能用相对路径，想想也是合情合理的，因为连接器目录在特定位置
-hserver:  check_lib
-	$(CC) $(CFLAGS) -o ${OUTPUT}/$@ ${SRCS}/$@.c -L${LIBSRC} -l${LIB_NAME} -I${INCLUDE} -Wl,-rpath=${LIBSRC}
-hclient:  check_lib
-	$(CC) $(CFLAGS) -o ${OUTPUT}/$@ ${SRCS}/$@.c -L${LIBSRC} -l${LIB_NAME} -I${INCLUDE} -Wl,-rpath=${LIBSRC}
-file_client:  check_lib
-	$(CC) $(CFLAGS) -o ${OUTPUT}/$@ ${SRCS}/$@.c -L${LIBSRC} -l${LIB_NAME} -I${INCLUDE} -Wl,-rpath=${LIBSRC}
-file_server:  check_lib
-	$(CC) $(CFLAGS) -o ${OUTPUT}/$@ ${SRCS}/$@.c -L${LIBSRC} -l${LIB_NAME} -I${INCLUDE} -Wl,-rpath=${LIBSRC}
+${DEFUALT_TARGET}:check_lib
+	${RULE}	
 check_lib :
 	$(CC) $(CCFLAGS) -shared -fPIC -o $(LIBSRC)/libcheck_lib.so ${check_lib_src} -I./checkLib/
-
+udp_client:
+	${RULE}
+udp_server:
+	${RULE}
 # Rule to run the program
-run:$(TARGET)
-	LD_LIBRARY_PATH=$(LIBSRC):$$LD_LIBRARY_PATH ./$(OUTPUT)/hserver
-	LD_LIBRARY_PATH=$(LIBSRC):$$LD_LIBRARY_PATH ./$(OUTPUT)/hclinet
+# run:${DEFUALT_TARGET}
+# 	LD_LIBRARY_PATH=$(LIBSRC):$$LD_LIBRARY_PATH ./$(OUTPUT)/hserver
+# 	LD_LIBRARY_PATH=$(LIBSRC):$$LD_LIBRARY_PATH ./$(OUTPUT)/hclinet
 	
 
 # Rule to clean up compiled files
