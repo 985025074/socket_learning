@@ -12,5 +12,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/select.h>
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr_in6 sockaddr_in6;

@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g
 
 # some target which have been perfectly done
-DEFUALT_TARGET = hserver hclient file_client file_server 
+DEFUALT_TARGET = hserver hclient file_client file_server select_exp
 
 LIB_NAME = check_lib
 # 注意 -l接的库名 去掉前后缀
