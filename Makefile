@@ -33,9 +33,8 @@ ${DEFUALT_TARGET}:check_lib
 	${NORMAL_RULE}	
 check_lib :
 	$(CC) $(CCFLAGS) -shared -fPIC -o $(LIBSRC)/lib$@.so ${check_lib_src} -I./checkLib/
-set_get_socket_opt:check_lib
+pipe_exp:check_lib
 	${NORMAL_RULE}
-
 # Rule to run the program
 # run:${DEFUALT_TARGET}
 # 	LD_LIBRARY_PATH=$(LIBSRC):$$LD_LIBRARY_PATH ./$(OUTPUT)/hserver
