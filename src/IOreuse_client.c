@@ -1,6 +1,6 @@
 
 #include "normal_include.h"
-//该程序用以验证half-close的tcp
+
 int main(int argc, char *argv[]){
     checkArgs(argc,3,"args is not enough\n");
     sockaddr_in addr;
@@ -15,11 +15,13 @@ int main(int argc, char *argv[]){
 
     checkTrue(connect(sockfd,(struct sockaddr*)&addr,sizeof(addr))>=0,"accept failed\n");
     printf("connect succeed!\n");
-    char buffer[10] = {0};
-    readWithCheck(sockfd,buffer,10,"read failed\n");
-    printf("receive:%s\n",buffer);
-
-    writeWithCheck(sockfd,"Thanks\n",sizeof("Thanks\n"), "write failed\n");
+    char buffer[1024];
+    scanf("%s",buffer);
+    if(strcmp(buffer,"exit") == 0){
+        shutdown(sockfd,SHUT_RDWR);
+        return 0;
+    }
+    writeWithCheck(sockfd, buffer, strlen(buffer), "write failed\n");
     close(sockfd);
     return 0;
 }

@@ -1,0 +1,6 @@
+# 忽略output文件夹
+output/
+# 忽略.so后缀文件
+*.so
+#忽略
+a.out
